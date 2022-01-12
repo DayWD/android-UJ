@@ -39,11 +39,11 @@ fun Route.deleteProduct(){
         val id: Int = call.parameters["id"]?.toInt() ?: -1
         if (id != -1) {
             transaction {
-                ProductsTable.deleteWhere { ProductsTable.product_id eq id }
+                ProductsTable.deleteWhere { product_id eq id }
             }
-            call.respond("Product Deleted")
+            call.respond(HttpStatusCode.OK,"Product Deleted")
         }
-        else call.respond(HttpStatusCode.NotFound)
+        else call.respond(HttpStatusCode.NoContent)
     }
 }
 fun Route.editProduct(){
@@ -52,7 +52,7 @@ fun Route.editProduct(){
         val product = call.receive<Product>()
         if (id != -1) {
             transaction {
-                ProductsTable.update({ ProductsTable.product_id eq id }) {
+                ProductsTable.update({ product_id eq id }) {
                     it[product_price] = product.product_price
                     it[product_name] = product.product_name
                     it[product_category_id] = product.product_category_id
@@ -61,7 +61,7 @@ fun Route.editProduct(){
             }
             call.respond(HttpStatusCode.OK, "Product data has modified")
         }
-        else call.respond(HttpStatusCode.NotFound)
+        else call.respond(HttpStatusCode.NoContent)
     }
 }
 fun Route.searchProduct(){
@@ -73,7 +73,7 @@ fun Route.searchProduct(){
                 products.add(Product(it[product_id], it[product_price], it[product_name], it[product_category_id], it[description]))
             }
         }
-        call.respond(HttpStatusCode.Found,products)
+        call.respond(HttpStatusCode.OK,products)
     }
 
     get("/product/{id}") {
@@ -81,12 +81,12 @@ fun Route.searchProduct(){
         var product = Product()
         if (id != -1) {
             transaction {
-                val query = ProductsTable.select { ProductsTable.product_id eq id }.toList()[0]
+                val query = ProductsTable.select { product_id eq id }.toList()[0]
                     product = Product(id, query[product_price], query[product_name], query[product_category_id], query[description])
                 }
-                call.respond(HttpStatusCode.Found,product)
+                call.respond(HttpStatusCode.OK,product)
         }
-        else call.respond(HttpStatusCode.NotFound)
+        else call.respond(HttpStatusCode.NoContent)
     }
 }
 fun Route.createProduct() {

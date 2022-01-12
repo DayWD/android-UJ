@@ -33,9 +33,9 @@ fun Route.deleteCart(){
             transaction {
                 CartsTable.deleteWhere { CartsTable.cart_id eq id }
             }
-            call.respond("Data in cart has deleted")
+            call.respond(HttpStatusCode.OK,"Data in cart has deleted")
         }
-        else call.respond(HttpStatusCode.NotFound)
+        else call.respond(HttpStatusCode.NoContent)
     }
 }
 
@@ -53,12 +53,23 @@ fun Route.editCart(){
             }
             call.respond(HttpStatusCode.OK, "Cart data has modified")
         }
-        else call.respond(HttpStatusCode.NotFound)
+        else call.respond(HttpStatusCode.NoContent)
     }
 }
 
-fun Route.searchCart(){ // user ID!!!
-    get ("/cart/{id}") {
+fun Route.searchCart(){
+    get ("/cart") {
+        val carts: MutableList<Cart> = ArrayList()
+        transaction {
+            val query = CartsTable.selectAll().toList()
+            query.forEach {
+                carts.add(Cart(it[CartsTable.cart_id], it[CartsTable.cart_user_id], it[CartsTable.cart_product_id], it[CartsTable.cart_product_quantity]))
+            }
+        }
+        call.respond(HttpStatusCode.OK,carts)
+    }
+
+    get ("/cart/{id}") {    // user ID
         val id: Int = call.parameters["id"]?.toInt() ?: -1
         val cart: MutableList<Cart> = ArrayList()
         if (id != -1) {
@@ -68,9 +79,9 @@ fun Route.searchCart(){ // user ID!!!
                     cart.add(Cart(it[CartsTable.cart_id], it[CartsTable.cart_user_id], it[CartsTable.cart_product_id], it[CartsTable.cart_product_quantity]))
                 }
             }
-            call.respond(HttpStatusCode.Found,cart)
+            call.respond(HttpStatusCode.OK,cart)
         }
-        else call.respond(HttpStatusCode.NotFound)
+        else call.respond(HttpStatusCode.NoContent)
     }
 }
 

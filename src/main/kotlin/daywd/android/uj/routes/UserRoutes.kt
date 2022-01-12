@@ -1,6 +1,7 @@
 package daywd.android.uj.routes
 
 import daywd.android.uj.models.*
+import daywd.android.uj.tables.ProductsTable
 import daywd.android.uj.tables.UsersTable
 import daywd.android.uj.tables.UsersTable.user_email
 import daywd.android.uj.tables.UsersTable.user_id
@@ -30,9 +31,9 @@ fun Route.deleteUser(){
             transaction {
                 UsersTable.deleteWhere { user_id eq id }
             }
-            call.respond("User Deleted")
+            call.respond(HttpStatusCode.OK,"User Deleted")
         }
-        else call.respond(HttpStatusCode.NotFound)
+        else call.respond(HttpStatusCode.NoContent)
     }
 }
 fun Route.editUser(){
@@ -49,10 +50,21 @@ fun Route.editUser(){
             }
             call.respond(HttpStatusCode.OK, "User data has modified")
         }
-        else call.respond(HttpStatusCode.NotFound)
+        else call.respond(HttpStatusCode.NoContent)
     }
 }
 fun Route.searchUser(){
+    get ("/user") {
+        val users: MutableList<User> = ArrayList()
+        transaction {
+            val query = UsersTable.selectAll().toList()
+            query.forEach {
+                users.add(User(it[user_id], it[user_login], it[user_email], it[user_password]))
+            }
+        }
+        call.respond(HttpStatusCode.OK,users)
+    }
+
     get("/user/{id}") {
         val id: Int = call.parameters["id"]?.toInt() ?: -1
         var user = User(id)
@@ -61,9 +73,9 @@ fun Route.searchUser(){
                 val query = UsersTable.select { user_id eq id }.toList()[0]
                 user = User(id, query[user_login], query[user_email], query[user_password])
             }
-            call.respond(HttpStatusCode.Found,user)
+            call.respond(HttpStatusCode.OK,user)
         }
-        else call.respond(HttpStatusCode.NotFound)
+        else call.respond(HttpStatusCode.NoContent)
     }
 }
 fun Route.createUser(){
