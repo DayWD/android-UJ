@@ -16,7 +16,7 @@ import io.ktor.routing.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
-fun Application.orderInfoSerialization(){
+fun Application.orderInfoSerialization() {
     routing {
         createOrder()
         searchOrder()
@@ -25,19 +25,19 @@ fun Application.orderInfoSerialization(){
     }
 }
 
-fun Route.deleteOrder(){
-    delete ("/order/{id}"){
+fun Route.deleteOrder() {
+    delete("/order/{id}") {
         val id: Int = call.parameters["id"]?.toInt() ?: -1
         if (id != -1) {
             transaction {
                 OrdersInfoTable.deleteWhere { OrdersInfoTable.order_id eq id }
             }
-            call.respond(HttpStatusCode.OK,"Order Deleted")
-        }
-        else call.respond(HttpStatusCode.NoContent)
+            call.respond(HttpStatusCode.OK, "Order Deleted")
+        } else call.respond(HttpStatusCode.NoContent)
     }
 }
-fun Route.editOrder(){
+
+fun Route.editOrder() {
     put("/order/{id}") {
         val id: Int = call.parameters["id"]?.toInt() ?: -1
         val order = call.receive<OrderInfo>()
@@ -52,21 +52,29 @@ fun Route.editOrder(){
                 }
             }
             call.respond(HttpStatusCode.OK, "Order data has modified")
-        }
-        else call.respond(HttpStatusCode.NoContent)
+        } else call.respond(HttpStatusCode.NoContent)
     }
 }
 
-fun Route.searchOrder(){
-    get ("/order") {
+fun Route.searchOrder() {
+    get("/order") {
         val orders: MutableList<OrderInfo> = ArrayList()
         transaction {
             val query = OrdersInfoTable.selectAll().toList()
             query.forEach {
-                orders.add(OrderInfo(it[order_id], it[order_user_id], it[order_name], it[order_address], it[order_phone], it[order_mail]))
+                orders.add(
+                    OrderInfo(
+                        it[order_id],
+                        it[order_user_id],
+                        it[order_name],
+                        it[order_address],
+                        it[order_phone],
+                        it[order_mail]
+                    )
+                )
             }
         }
-        call.respond(HttpStatusCode.OK,orders)
+        call.respond(HttpStatusCode.OK, orders)
     }
 
     get("/order/{id}") {
@@ -76,16 +84,24 @@ fun Route.searchOrder(){
             transaction {
                 val query = OrdersInfoTable.select { OrdersInfoTable.order_id eq id }.toList()
                 query.forEach {
-                    orders.add(OrderInfo(id, it[order_user_id], it[order_name], it[order_address], it[order_phone], it[order_mail]))
+                    orders.add(
+                        OrderInfo(
+                            id,
+                            it[order_user_id],
+                            it[order_name],
+                            it[order_address],
+                            it[order_phone],
+                            it[order_mail]
+                        )
+                    )
                 }
             }
-            call.respond(HttpStatusCode.OK,orders)
-        }
-        else call.respond(HttpStatusCode.NoContent)
+            call.respond(HttpStatusCode.OK, orders)
+        } else call.respond(HttpStatusCode.NoContent)
     }
 }
 
-fun Route.createOrder(){
+fun Route.createOrder() {
     post("/order") {
         val order = call.receive<OrderInfo>()
         transaction {
@@ -97,6 +113,6 @@ fun Route.createOrder(){
                 it[order_mail] = order.order_mail
             }
         }
-        call.respond(HttpStatusCode.Created,"Order inserted")
+        call.respond(HttpStatusCode.Created, "Order inserted")
     }
 }

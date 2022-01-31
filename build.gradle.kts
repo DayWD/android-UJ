@@ -30,5 +30,6 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("org.xerial:sqlite-jdbc:3.36.0.2")
+    implementation ("com.stripe:stripe-java:20.97.0")
 
 }

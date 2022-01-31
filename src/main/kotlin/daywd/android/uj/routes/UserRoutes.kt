@@ -1,7 +1,6 @@
 package daywd.android.uj.routes
 
-import daywd.android.uj.models.*
-import daywd.android.uj.tables.ProductsTable
+import daywd.android.uj.models.User
 import daywd.android.uj.tables.UsersTable
 import daywd.android.uj.tables.UsersTable.user_email
 import daywd.android.uj.tables.UsersTable.user_id
@@ -15,7 +14,7 @@ import io.ktor.routing.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
-fun Application.userSerialization(){
+fun Application.userSerialization() {
     routing {
         createUser()
         searchUser()
@@ -24,19 +23,19 @@ fun Application.userSerialization(){
     }
 }
 
-fun Route.deleteUser(){
-    delete ("/user/{id}"){
+fun Route.deleteUser() {
+    delete("/user/{id}") {
         val id: Int = call.parameters["id"]?.toInt() ?: -1
         if (id != -1) {
             transaction {
                 UsersTable.deleteWhere { user_id eq id }
             }
-            call.respond(HttpStatusCode.OK,"User Deleted")
-        }
-        else call.respond(HttpStatusCode.NoContent)
+            call.respond(HttpStatusCode.OK, "User Deleted")
+        } else call.respond(HttpStatusCode.NoContent)
     }
 }
-fun Route.editUser(){
+
+fun Route.editUser() {
     put("/user/{id}") {
         val id: Int = call.parameters["id"]?.toInt() ?: -1
         val user = call.receive<User>()
@@ -49,12 +48,12 @@ fun Route.editUser(){
                 }
             }
             call.respond(HttpStatusCode.OK, "User data has modified")
-        }
-        else call.respond(HttpStatusCode.NoContent)
+        } else call.respond(HttpStatusCode.NoContent)
     }
 }
-fun Route.searchUser(){
-    get ("/user") {
+
+fun Route.searchUser() {
+    get("/user") {
         val users: MutableList<User> = ArrayList()
         transaction {
             val query = UsersTable.selectAll().toList()
@@ -62,7 +61,7 @@ fun Route.searchUser(){
                 users.add(User(it[user_id], it[user_login], it[user_email], it[user_password]))
             }
         }
-        call.respond(HttpStatusCode.OK,users)
+        call.respond(HttpStatusCode.OK, users)
     }
 
     get("/user/{id}") {
@@ -73,12 +72,12 @@ fun Route.searchUser(){
                 val query = UsersTable.select { user_id eq id }.toList()[0]
                 user = User(id, query[user_login], query[user_email], query[user_password])
             }
-            call.respond(HttpStatusCode.OK,user)
-        }
-        else call.respond(HttpStatusCode.NoContent)
+            call.respond(HttpStatusCode.OK, user)
+        } else call.respond(HttpStatusCode.NoContent)
     }
 }
-fun Route.createUser(){
+
+fun Route.createUser() {
     post("/user") {
         val user = call.receive<User>()
         transaction {
@@ -88,6 +87,6 @@ fun Route.createUser(){
                 it[user_password] = user.password
             }
         }
-        call.respond(HttpStatusCode.Created,"User inserted")
+        call.respond(HttpStatusCode.Created, "User inserted")
     }
 }
