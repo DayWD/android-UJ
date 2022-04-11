@@ -1,0 +1,1 @@
+## Aplikacja tworzona na API 31 na urządzeniu Pixel 3a z API 31.
