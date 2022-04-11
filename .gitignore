@@ -1,0 +1,5 @@
+build/*
+src/main/kotlin/daywd/android/uj/Keys.kt
+Dockerfile
+.gradle/*
+.idea/*
